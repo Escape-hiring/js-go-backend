@@ -1,0 +1,10 @@
+---
+# Local redpanda cluster configuration file
+# Read by docker compose for local development
+# Read by terraform for production deployment
+kafka:
+  brokers: ["redpanda:29092"]
+redpanda:
+  adminApi:
+    enabled: true
+    urls: ["http://redpanda:9644"]
