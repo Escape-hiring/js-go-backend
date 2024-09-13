@@ -19,21 +19,15 @@ export const login = async (
   email: string,
   password: string
 ): Promise<{ jwt: string }> => {
-  const user = await prisma.user.findUnique({
-    where: { email },
-  });
-
-  if (user === null) {
-    throw new ValidationError("Invalid email or password");
-  }
+  const user = await prisma.user.findUnique({ where: { email } });
+  if (user === null) throw new ValidationError("Invalid email or password");
 
   const hash = crypto
     .pbkdf2Sync(password, user.salt, 1000, 64, "sha512")
     .toString("hex");
 
-  if (!crypto.timingSafeEqual(Buffer.from(hash), Buffer.from(user.password))) {
+  if (!crypto.timingSafeEqual(Buffer.from(hash), Buffer.from(user.password)))
     throw new ValidationError("Invalid email or password");
-  }
 
   return {
     jwt: jwt.sign(
@@ -51,18 +45,15 @@ export const authenticate = async (
     id: string;
   };
 
-  if (decoded.expires_at < Math.floor(Date.now() / 1000)) {
+  if (decoded.expires_at < Math.floor(Date.now() / 1000))
     throw new AuthenticationError();
-  }
 
   const user = await prisma.user.findUnique({
     where: { id: decoded.id },
     select: { id: true, email: true, createdAt: true, updatedAt: true },
   });
 
-  if (user === null) {
-    throw new AuthenticationError();
-  }
+  if (user === null) throw new AuthenticationError();
 
   return user;
 };

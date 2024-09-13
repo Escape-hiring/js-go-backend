@@ -1,48 +1,4 @@
 services:
-  redpanda:
-    image: redpandadata/redpanda:v23.2.10
-    command:
-      - redpanda start
-      - --smp 1
-      - --kafka-addr PLAINTEXT://0.0.0.0:29092,OUTSIDE://0.0.0.0:9092
-      - --advertise-kafka-addr PLAINTEXT://redpanda:29092,OUTSIDE://localhost:9092
-      - --overprovisioned
-      - --memory 500M
-    ports:
-      - 9092:9092 # Kafka: http://localhost:9092
-      - 9644:9644 # AdminAPI: http://localhost:9644/public_metrics
-      - 29092:29092 # Kafka (TLS): https://localhost:29092
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://redpanda:9644/public_metrics"]
-      interval: 1s
-      timeout: 10s
-      retries: 10
-      start_period: 5s
-
-  redpanda-dev-provision:
-    image: redpandadata/redpanda:v23.1.13
-    entrypoint: /bin/bash
-    command: /etc/kafka/init-panda.sh
-    environment:
-      REDPANDA_URI: redpanda:29092
-      ENVIRONMENT: development
-    volumes:
-      - ./redpanda:/etc/kafka
-    depends_on:
-      redpanda:
-        condition: service_healthy
-
-  redpanda-console:
-    image: redpandadata/console:v2.3.3
-    volumes:
-      - ./redpanda:/etc/kafka
-    environment:
-      CONFIG_FILEPATH: /etc/kafka/config.yaml
-    ports:
-      - 15671:8080
-    depends_on:
-      - redpanda-dev-provision
-
   database:
     image: postgres:13.9
     restart: unless-stopped
@@ -56,7 +12,22 @@ services:
     ports:
       - "5432:5432"
 
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    ports:
+      - 5672:5672
+      - 15672:15672
+    environment:
+      - RABBITMQ_DEFAULT_USER=tasky
+      - RABBITMQ_DEFAULT_PASS=password
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+
   administration:
+    depends_on:
+      - database
+      - rabbitmq
     build:
       context: ./services/administration-service
       dockerfile: Dockerfile
@@ -67,15 +38,18 @@ services:
     environment:
       PORT: 2602
       DATABASE_URL: postgres://tasky:password@database:5432/tasky
-      KAFKA_URI: redpanda:29092
+      RABBITMQ_URL: amqp://tasky:password@rabbitmq:5672
       JWT_SECRET: secret
 
   tasks:
+    depends_on:
+      - rabbitmq
     build:
       context: ./services/tasks-service
       dockerfile: Dockerfile
     environment:
-      KAFKA_URI: redpanda:29092
+      RABBITMQ_URL: amqp://tasky:password@rabbitmq:5672
 
 volumes:
   postgres-data: null
+  rabbitmq_data: null

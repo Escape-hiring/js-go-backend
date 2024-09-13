@@ -3,13 +3,22 @@ package main
 import (
 	"fmt"
 
-	"github.com/confluentinc/confluent-kafka-go/v2/kafka"
+	"github.com/rabbitmq/amqp091-go"
 )
 
-func handler(msg *kafka.Message) {
-	fmt.Printf("Handler: Message on %s: %s\n", msg.TopicPartition, string(msg.Value))
+func handler(msg *amqp091.Delivery) error {
+	fmt.Println(string(msg.Body))
+	return nil
 }
 
 func main() {
-	Consume([]string{"users.created"}, handler)
+	client := NewAMQPClient()
+
+
+	client.Consume(
+		UserCreatedTopic,
+		handler,
+	)
+
+	// client.Send(TaskCreatedTopic, []byte("Hello, World!"))
 }

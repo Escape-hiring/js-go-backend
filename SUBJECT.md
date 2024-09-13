@@ -10,11 +10,18 @@ The first version of the system should allow users to create tasks, and have the
 
 ### Instructions
 
-- Your git history matters, it will be used to perform the review
+### Guidelines
+
+- Your git history matters, it will be used to perform the review. **Please make a commit per exercice**
 - You can use any library you want, but you should be able to explain why you chose it
-- You can provide a markdown file presenting your work for each exercice, the choices you made, and the difficulties you encountered
-- Informations can be found within the README.md file of the project :)
-- When you need to publish a message on the broker, you should follow the topic in the question, as these topics are already provisioned onto the broker.
+- The best way for you to present your work is to provide a link to a git repository.
+- You have to send us something after 3 hours, even if you haven't finished. All that being said, if you want to, you can use more than 3 hours to finish the challenge and showcase your skills.
+
+### Don't forget
+
+- Read the README.md file
+- Any best practice regarding event based system, or Node.js, or Golang, or anything else, that you would like to showcase, is welcome
+- To restart your docker containers in case of trouble
 
 ### Known issues
 
@@ -23,16 +30,6 @@ The first version of the system should allow users to create tasks, and have the
 ```bash
 make migrate
 docker-compose up --build administration
-```
-
-- When adding new topics to the tasks service subscription, you might need to manually delete the existing consumer group topic assignment for it to work correctly.
-
-```txt
-- Stop the tasks service `docker compose stop tasks`
-- Go to http://localhost:15671/groups/tasks-service
-- Refresh until the consumer group is empty
-- Click on the bin icon next to the `user.created` topic to delete the topic partition assignment
-- Restart the tasks service `docker compose up --build tasks`
 ```
 
 ## Exercice 1: Have the administation service handling tasks
@@ -50,7 +47,7 @@ Relevant documentation:
 - <https://www.prisma.io/docs/orm/prisma-schema/data-model/relations/one-to-many-relations>
 - <https://expressjs.com/fr/guide/routing.html>
 - <https://expressjs.com/fr/guide/using-middleware.html>
-- <https://kafka.js.org/docs/getting-started>
+- <https://www.rabbitmq.com/tutorials>
 
 ### 1.1 - Create a task model
 
@@ -83,15 +80,14 @@ Currently, the tasks service is not doing much. It listens on the `user.created`
 
 Relevant documentation:
 
-- <https://github.com/confluentinc/confluent-kafka-go/blob/master/examples/json_producer_example/json_producer_example.go>
-- <https://github.com/confluentinc/confluent-kafka-go/blob/master/examples/consumer_example/consumer_example.go>
-- <https://github.com/confluentinc/confluent-kafka-go/blob/master/examples/json_producer_example/json_producer_example.go>
+- <https://www.rabbitmq.com/tutorials/tutorial-one-go#sending>
+- <https://www.rabbitmq.com/tutorials/tutorial-one-go#receiving>
 
 ### 2.1 - Listen on the `task.created` topic
 
 - Update the `tasks` service so that it listens on the `task.created` topic.
 - When a message is received, start a fake async worker that will update the task status to `RUNNING`, then `SUCCESS` or `FAILED` (randomly) after some delay.
-- You should rework the `producer.go` file so that it provides a correct producer to use. The provided file is a simple example of how to use the `confluent-kafka-go` library.
+- You should write a `producer.go` file so that it provides a correct producer to use.
 - After the delay is up, the task should become `SUCCESS` or `FAILED` randomly.
 
 ### 2.2 - Publish a message on the broker when a task's status changes

@@ -3,7 +3,7 @@ import { prisma } from "../helpers/prisma";
 import { logger } from "../helpers/logger";
 import type { User } from "@prisma/client";
 import { login } from "./auth";
-import { sendMessage } from "../helpers/kafka";
+import { sendMessage } from "../helpers/amqp";
 
 export const createUser = async (
   email: string,
@@ -19,20 +19,14 @@ export const createUser = async (
 
   logger.log(`Creating user with email ${email}`);
   const user = await prisma.user.create({
-    data: {
-      email,
-      password: hash,
-      salt,
-    },
-    select: {
-      createdAt: true,
-      email: true,
-      id: true,
-      updatedAt: true,
-    },
+    data: { email, password: hash, salt },
+    select: { createdAt: true, email: true, id: true, updatedAt: true },
   });
   logger.log(`Created user with email ${email}`);
 
-  await sendMessage("users.created", user);
+  sendMessage("user.created", {
+    timestampIso: user.createdAt.toISOString(),
+    user,
+  });
   return { user, ...(await login(user.email, password)) };
 };

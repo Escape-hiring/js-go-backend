@@ -32,16 +32,16 @@ docker compose up
 
 Tasky is made of 2 services:
 
-- `administration`: A Node.js REST API, based on [express](https://expressjs.com) used to store users and tasks within a PostgreSQL database, and to manage authentication. It leverages the [Prisma](https://prisma.io) ORM. It can interact with Kafka through the [KafkaJs](https://kafka.js.org/docs/getting-started) library.
-- `tasks` A Golang service composed of Kafka consumers and producers built on [confluent-kafka-go](https://github.com/confluentinc/confluent-kafka-go).
+- `administration`: A Node.js REST API, based on [express](https://expressjs.com) used to store users and tasks within a PostgreSQL database, and to manage authentication. It leverages the [Prisma](https://prisma.io) ORM. It can interact with RabbitMQ through the [amqplib](https://github.com/amqp-node/amqplib) library.
+- `tasks` A Golang service composed of RabbitMQ consumers and producers
 
-Both services can post and listen message from a [Redpanda](https://redpanda.com/) (~Kafka) message broker.
+Both services can post and listen message from a [RabbitMQ](https://www.rabbitmq.com) broker.
 
 ## Interfaces
 
 - The `administration` service exposes a REST API on [localhost:2602](http://localhost:2602)
-- The `tasks` listens on the Redpanda broker
-- The Redpanda broker exposes a web interface on [localhost:15671](http://localhost:15671)
+- The `tasks` listens on the RabbitMQ broker
+- The RabbitMQ broker exposes a web interface on [localhost:15671](http://localhost:15671)
 - The Postgres database can be accessed from [localhost:5432](localhost:5432)
 
 ## Usage and helpers
@@ -74,13 +74,13 @@ make migrate
 #### Node.js example
 
 - See `createUser` in [services/administration-service/src/lib/users.ts](./services/administration-service/src/lib/users.ts)
-- Browse the redpanda console on [localhost:15671](localhost:15671) -> `Topics` -> `<topic name>`
+- Browse the RabbitMQ console on [http://localhost:15672/#/queues/%2F/user.created](http://localhost:15672/#/queues/%2F/user.created)
 
 #### Golang example
 
-You can import the producer from `producer.go` service, then call `sendJson` on it to publish a message to the given topic.
+- See `client.Send(...)` in [services/tasks-service/tasks/main.go](./services/tasks-service/tasks/main.go)
 
-- Browse the redpanda console on [localhost:15671](localhost:15671) -> `Topics` -> `<topic name>`
+- Browse the RabbitMQ console on [http://localhost:15672/#/queues/%2F/user.created](http://localhost:15672/#/queues/%2F/user.created)
 
 ### How to consume a message from the message broker
 
@@ -90,4 +90,4 @@ You can import the producer from `producer.go` service, then call `sendJson` on 
 
 #### Golang example
 
-You can import the function `Consume` from `consumer.go`, then call it to consume messages from the given topic. An example can be found in [services/tasks-services/tasks/main.go](./services/tasks-service/tasks/main.go)
+- See `client.Consume(...)` in [services/tasks-service/tasks/main.go](./services/tasks-service/tasks/main.go)

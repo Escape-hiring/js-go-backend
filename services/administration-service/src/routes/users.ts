@@ -19,10 +19,7 @@ usersRouter.post("/", async (req, res, next) => {
 
   try {
     const { email, password } = z
-      .object({
-        email: z.string().email(),
-        password: z.string().min(8),
-      })
+      .object({ email: z.string().email(), password: z.string().min(8) })
       .parse(body);
 
     const user = await createUser(email, password);
