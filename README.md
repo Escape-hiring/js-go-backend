@@ -41,7 +41,7 @@ Both services can post and listen message from a [RabbitMQ](https://www.rabbitmq
 
 - The `administration` service exposes a REST API on [localhost:2602](http://localhost:2602)
 - The `tasks` listens on the RabbitMQ broker
-- The RabbitMQ broker exposes a web interface on [localhost:15671](http://localhost:15671)
+- The RabbitMQ broker exposes a web interface on [localhost:15672](http://localhost:15672)
 - The Postgres database can be accessed from [localhost:5432](localhost:5432)
 
 ## Usage and helpers
