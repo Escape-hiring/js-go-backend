@@ -6,19 +6,17 @@ import (
 	"github.com/rabbitmq/amqp091-go"
 )
 
-func handler(msg *amqp091.Delivery) error {
-	fmt.Println(string(msg.Body))
-	return nil
-}
-
 func main() {
-	client := NewAMQPClient()
+	// producer := NewAMQPClient()
+	// producer.Send(TaskCreatedTopic, []byte("Hello, World!"))
 
-
-	client.Consume(
+	NewAMQPClient().Consume(
 		UserCreatedTopic,
-		handler,
+		onUserCreated,
 	)
 
-	// client.Send(TaskCreatedTopic, []byte("Hello, World!"))
+	// Wait forever to not close the program
+	forever := make(chan bool)
+	fmt.Printf(" [*] Waiting for messages. To exit press CTRL+C")
+	<-forever
 }

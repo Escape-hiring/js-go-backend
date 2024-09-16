@@ -91,7 +91,6 @@ func (c *AMQPClient) Consume(topic string, handler func(msg *amqp091.Delivery) e
 		nil,   // args
 	)
 	failOnError(err, "Failed to register a consumer")
-	forever := make(chan bool)
 
 	go func() {
 		for d := range msgs {
@@ -103,7 +102,4 @@ func (c *AMQPClient) Consume(topic string, handler func(msg *amqp091.Delivery) e
 			d.Ack(false)
 		}
 	}()
-
-	log.Printf(" [*] Waiting for messages. To exit press CTRL+C")
-	<-forever
 }
