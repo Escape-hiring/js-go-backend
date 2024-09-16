@@ -87,13 +87,13 @@ Relevant documentation:
 
 - Update the `tasks` service so that it listens on the `task.created` topic.
 - When a message is received, start a fake async worker that will update the task status to `RUNNING`, then `SUCCESS` or `FAILED` (randomly) after some delay.
-- You should write a `producer.go` file so that it provides a correct producer to use.
 - After the delay is up, the task should become `SUCCESS` or `FAILED` randomly.
 
 ### 2.2 - Publish a message on the broker when a task's status changes
 
 - When a task's status changes to `RUNNING`, `SUCCESS` or `FAILED`, publish a message on the `task.updated` topic.
 - Have the administration service listen on the `task.updated` topic and update the task status in the database.
+- You should uppdate the `amqp.ts` file to define a RabbitMQ consumer.
 
 ## 2.3: Make sure many tasks can be handled simultaneously
 
